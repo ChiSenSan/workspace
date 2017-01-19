@@ -5,7 +5,10 @@ import tensorflow as tf
 # MNISTを読み込むためinput_data.pyを同じディレクトリに置きインポートする
 # input_data.pyはチュートリアル内にリンクがあるのでそこから取得する
 # https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/examples/tutorials/mnist/input_data.py
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
@@ -44,7 +47,10 @@ b = tf.Variable(tf.zeros([10]))
 # ソフトマックス回帰を実行
 # yは入力x（画像）に対しそれがある数字である確率の分布
 # matmul関数で行列xとWの掛け算を行った後、bを加算する。
+<<<<<<< HEAD
 # yは[1, 10]の行列
+=======
+>>>>>>> origin/master
 y = tf.nn.softmax(tf.matmul(x, W) + b)
 
 # 交差エントロピー
@@ -52,7 +58,11 @@ y = tf.nn.softmax(tf.matmul(x, W) + b)
 y_ = tf.placeholder(tf.float32, [None, 10])
 cross_entropy = -tf.reduce_sum(y_*tf.log(y))
 
+<<<<<<< HEAD
 # 勾配硬化法を用い交差エントロピーが最小となるようyを最適化する
+=======
+# 勾配降下法を用い交差エントロピーが最小となるようyを最適化する
+>>>>>>> origin/master
 train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
 
 # 用意した変数Veriableの初期化を実行する
@@ -70,7 +80,11 @@ sess.run(init)
 # 100つでも同じような結果を得ることができる
 # feed_dictでplaceholderに値を入力することができる
 print "--- 訓練開始 ---"
+<<<<<<< HEAD
 for i in range(5000):
+=======
+for i in range(1000):
+>>>>>>> origin/master
     batch_xs, batch_ys = mnist.train.next_batch(100)
     sess.run(train_step, feed_dict={x: batch_xs, y_:batch_ys})
 print "--- 訓練終了 ---"
