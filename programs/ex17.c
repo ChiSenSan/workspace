@@ -12,6 +12,7 @@
 #define WRITE_FILE  "H28LECBdataR.txt" //出力ランダムファイル
 
 #define FIELD "\n%-10s%-4s%-10s%-10s%-20s%-16s"
+#define R_FIELD "\n%10s%4s%10s%10s%20s%16s"
 #define REC 70
 
 #define ERR        printf //エラー表示用
@@ -22,6 +23,7 @@
 void Init(int t_cityRec[CITY_NUM][INVERT_ROW], int t_facRec[FAC_NUM][INVERT_ROW]);
 void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int flag);
 void DisplayTable(char *s_title, int *ar_list, int c_max);
+void SeachTable(int *ar_city, int *ar_fac, int *ar_seach, int i_mood);
 
 /***************
  *    main
@@ -60,10 +62,12 @@ int main(void){
     char s_seachEnd[] = "終了";
     char s_seachTable[] = "?";
     char c_seach = 0; //検索トライカウンタ
+    int i_inp; //検索モード指定用
     
+    int ar_seach[INVERT_ROW*2];
     //カウンタ
     int c_rec = 0; //レコードカウンタ
-    int i;
+    int i,j;
     
     
     //インバーテッドテーブルの初期化
@@ -152,6 +156,10 @@ int main(void){
 	}
     MES("--ランダムファイル作成終了--\n");
     
+    //ファイルのクローズ
+    fclose(p_fileR);
+    fclose(p_fileW);
+    
     //インバーテッドテーブルの内容表示
     MES("出身市テーブルの内容\n");
     MES("		件数＝%d\n",c_city);
@@ -165,6 +173,13 @@ int main(void){
     	DisplayTable(t_facName[i], t_facRec[i], c_facRecMax);
 	}	
     MES("\n\n");
+    
+    //ランダムファイル
+    p_fileR = fopen(WRITE_FILE, "r" );
+    if( p_fileR == NULL ){
+        ERR("入力ファイルが見つかりません\n");
+        EXIT;
+    }
     
     //検索機能
     MES("～～　検索処理　開始　～～\n");
@@ -198,15 +213,52 @@ int main(void){
     			}
     		}
     		else{
+    			//検索
+    			MES("　　   論理演算（積->1, 和->2       ?");
+    			scanf(" %d", &i_inp);
+    			
+    			//市名
+    			for(i=0; i<c_city; i++){
+    				if(strcmp(s_inpCity, t_cityName[i]))
+    					break;
+    			}
+    			//学部
+    			for(j=0; j<c_fac; j++){
+    				if(strcmp(s_inpFac, t_facName[i]))
+    					break;
+    			}
+    			
+    			SeachTable(t_cityRec[i], t_facRec[j], ar_seach, i_inp);
+    			
+    			//DEBAG("%d:::\n",ar_seach[0]-1);
+    			
+    			//検索結果の表示
+    			
+    			if(ar_seach[0] > 1){
+    				for(i=1; i<ar_seach[0]; i++){
+    					//DEBAG("%d  \n", ar_seach[i]);
+    					MES("(%3d) 順番＝%d\n", i+1,ar_seach[i]);
+    					fseek(p_fileR, REC*(ar_seach[i]-1), 0);
+    					fscanf(p_fileR, R_FIELD, s_name, s_sex, s_pref, s_city, s_school, s_fac);
+    					
+    					MES("　　   名前＝ \t%s\n", s_name);
+    					MES("　　   出身市名＝ \t%s\n", s_city);
+    					MES("　　   出身高校名＝ \t%s\n", s_school);
+    					MES("　　   学部名＝ \t%s\n",s_fac);
+    					MES("\n");
+    				}
+    			}
+    			else{
+    				MES("検索結果はありません。\n");
+    			}
     		}
     	}
     	c_seach++;
 	}
     MES("～～　検索処理　終了　～～\n");
     
-    //ファイルのクローズ
-    fclose(p_fileR);
-    fclose(p_fileW);
+	//ファイルのクローズ
+	fclose(p_fileR);
     
     MES("--プログラム終了\n");
     return 0;
@@ -263,4 +315,48 @@ void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int fl
  	 	 MES("%3d:",ar_list[i]);
  	 }
  	 MES("\n");
+ }
+ 
+ /*****************************************
+ *    インバーテッドテーブルの検索
+ *****************************************/
+ void SeachTable(int *ar_city, int *ar_fac, int *ar_seach, int i_mood)
+ {
+ 	 int i,j;
+ 	 for(i=0; i<INVERT_ROW*2; i++){
+ 	 	 ar_seach[i] = -9;
+ 	 }
+ 	 ar_seach[0] = 0;
+ 	 DEBAG("initialize Done\n");
+ 	 if(!(i_mood-1)){
+ 	 	 DEBAG("seki\n");
+ 	 	 //積
+ 	 	 for(i=1; i<ar_city[0]; i++){
+ 	 	 	 for(j=1; j<ar_fac[0]; j++){
+ 	 	 	 	 if(ar_city[i] == ar_fac[j]){
+ 	 	 	 	 	 ar_seach[++ar_seach[0]] = ar_city[i];
+ 	 	 	 	 	 break;
+ 	 	 	 	 }
+ 	 	 	 }
+ 	 	 }
+ 	 	 MES("　　   論理積データ　%d件\n",ar_seach[0]-1);
+ 	 }
+ 	 else{
+ 	 	 DEBAG("wa\n");
+ 	 	 //和
+ 	 	 //学部テーブルを流し込む
+ 	 	 for(i=1; i<ar_fac[0]; i++)
+			ar_seach[++ar_seach[0]] = ar_fac[i];
+			
+		//学部テーブルになかったものを市名テーブルから追加する
+		for(i=1; i<ar_city[0]; i++){
+ 	 	 	 for(j=1; j<ar_fac[0]; j++){
+ 				//何もしない
+ 	 	 	 }
+ 	 	 	 if(j < ar_fac[0]){
+ 	 	 	 	 ar_seach[++ar_seach[0]] = ar_city[i];
+ 	 	 	 }
+ 	 	 }
+ 	 	 MES("　　   論理和データ　%d件\n",ar_seach[0]-1);
+ 	 }
  }
