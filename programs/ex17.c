@@ -6,7 +6,7 @@
 
 #define CITY_NUM 50        //市の名前　登録上限
 #define FAC_NUM 20         //学部名　登録上限
-#define INVERT_ROW 20+1    //インバーテッドテーブル　列数 最前列は要素数
+#define INVERT_ROW 25+1    //インバーテッドテーブル　列数 最前列は要素数
 
 #define READ_FILE   "H28LECBdata1.txt" //入力ファイル
 #define WRITE_FILE  "H28LECBdataR.txt" //出力ランダムファイル
@@ -16,11 +16,12 @@
 
 #define ERR        printf //エラー表示用
 #define DEBAG      printf //デバッグ表示用
+#define MES        printf //メッセージ表示用
 #define EXIT      exit(0) //強制終了
 //プロトタイプ宣言系
 void Init(int t_cityRec[CITY_NUM][INVERT_ROW], int t_facRec[FAC_NUM][INVERT_ROW]);
 void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int flag);
-void DisplayTable(char *s_title, int *ar_list);
+void DisplayTable(char *s_title, int *ar_list, int c_max);
 
 /***************
  *    main
@@ -28,13 +29,16 @@ void DisplayTable(char *s_title, int *ar_list);
 int main(void){
     //インバーテッドテーブル系
     //出身市
-    char t_cityName[CITY_NUM][10]; //市名格納
+    char t_cityName[CITY_NUM][16]; //市名格納
     int t_cityRec[CITY_NUM][INVERT_ROW]; //インバーテッドテーブル
     int c_city = 0; //市数カウンタ
+    int c_cityRecMax = 0; //レコードの最大数
+    
     //学部
     char t_facName[FAC_NUM][16]; //学部名格納
     int t_facRec[FAC_NUM][INVERT_ROW]; //インバーテッドテーブル
     int c_fac = 0; //学部数カウンタ
+    int c_facRecMax = 0; //レコードの最大数
     
     //ファイルポインタ
     FILE *p_fileR; //読み込みファイル"H28LECBdata1.txt"ポインタ
@@ -44,12 +48,23 @@ int main(void){
     char s_name[10];  //名前
     char s_sex[3];      //性別
     char s_pref[10];  //出身県
-    char s_city[10];  //出身市
+    char s_city[16];  //出身市
     char s_school[20];//出身校
     char s_fac[16];   //学部
+    
+    //検索系
+    //検索入力用
+    char s_inpCity[20];
+    char s_inpFac[20]; 
+    //予約語
+    char s_seachEnd[] = "終了";
+    char s_seachTable[] = "?";
+    char c_seach = 0; //検索トライカウンタ
+    
     //カウンタ
     int c_rec = 0; //レコードカウンタ
     int i;
+    
     
     //インバーテッドテーブルの初期化
     Init( t_cityRec, t_facRec );
@@ -72,7 +87,7 @@ int main(void){
     //------------------------------------------------
     //    インバーテッドテーブル、ランダムファイルの作成
     //------------------------------------------------
-    printf("--ランダムファイル作成開始--\n");
+    MES("--ランダムファイル作成開始--\n");
     
     while(1){
         //読み込み
@@ -100,10 +115,10 @@ int main(void){
             c_rec++;
             //市名が既存か探索
             for(i=0; i < c_city; i++){
-                if(strcmp(&t_cityName[i][0],s_city)){
-                	
+                if(!strcmp(&t_cityName[i][0],s_city)){
                     //既存の場合
                     EditTable(NULL, NULL, t_cityRec[i], c_rec, 1);
+                    break;
                 }
             }
             if(i == c_city){
@@ -112,12 +127,16 @@ int main(void){
                 c_city++;
                 
             }
-            
+            else{
+            	//レコード最大数を更新
+            	if(c_cityRecMax < t_cityRec[i][0]) c_cityRecMax = t_cityRec[i][0];
+            }
             //学部が既存か探索
-            for(i=0; i <= c_fac; i++){
-                if(strcmp(&t_facName[i][0],s_fac)){
+            for(i=0; i < c_fac; i++){
+                if(!strcmp(&t_facName[i][0],s_fac)){
                     //既存の場合
                     EditTable(NULL, NULL, t_facRec[i], c_rec, 1);
+                    break;
                 }
             }
             if(i == c_fac){
@@ -125,28 +144,71 @@ int main(void){
                 EditTable(s_fac, t_facName[c_fac], t_facRec[c_fac], c_rec, 0);
                 c_fac++;
             }
+            else{
+            	//レコード最大数を更新
+            	if(c_facRecMax < t_facRec[i][0]) c_facRecMax = t_facRec[i][0];
+            }
         }
-    }
-    printf("--ランダムファイル作成終了--\n");
+	}
+    MES("--ランダムファイル作成終了--\n");
     
     //インバーテッドテーブルの内容表示
-    printf("出身市テーブルの内容\n");
-    printf("		件数＝%d\n",c_city);
-    for(i=0; i<c_city; i++)
-    	DisplayTable(t_cityName[i], t_cityRec[i]);
+    MES("出身市テーブルの内容\n");
+    MES("		件数＝%d\n",c_city);
+    for(i=0; i<c_city; i++){
+    	DisplayTable(t_cityName[i], t_cityRec[i], c_cityRecMax);
+	}
+    MES("\n\n");
+    MES("学部テーブルの内容\n");
+    MES("		件数＝%d\n",c_fac);
+    for(i=0; i<c_fac; i++){
+    	DisplayTable(t_facName[i], t_facRec[i], c_facRecMax);
+	}	
+    MES("\n\n");
     
-    printf("\n\n");
-    printf("学部テーブルの内容\n");
-    printf("		件数＝%d\n",c_fac);
-    for(i=0; i<c_fac; i++)
-    	DisplayTable(t_facName[i], t_facRec[i]);
-    
-    
+    //検索機能
+    MES("～～　検索処理　開始　～～\n");
+    while(1){
+    	MES("【%3d】出身市名を入力してください\n",c_seach+1);
+    	MES("　　   「%s」-->終了, 「%s」-->一覧表示     ?", s_seachEnd, s_seachTable);
+    	scanf(" %s",s_inpCity);
+    	//終了処理
+    	if(!strcmp(s_inpCity, s_seachEnd)){
+    		break;
+    	}
+    	//一覧表示
+    	else if(!strcmp(s_inpCity, s_seachTable)){
+    		MES("\n　　    ～　出身市名　一覧～\n");
+    		for(i=0; i<c_city; i++){
+    			MES("%-10s:",t_cityName[i]);
+    			if(!(i%5)) MES("\n");
+    		}
+    	}
+    	//学部
+    	else{
+    		MES("　　   学部名を入力してください\n");
+    		MES("　　   「%s」-->一覧表示    ?",s_seachTable);
+    		scanf(" %s",s_inpFac);
+    		//一覧表示
+    		if(!strcmp(s_inpFac, s_seachTable)){
+    			MES("\n　　    ～　学部名　一覧～\n");
+    			for(i=0; i<c_fac; i++){
+    				MES("%10s:",t_facName[i]);
+    				if(!(i%5)) MES("\n");
+    			}
+    		}
+    		else{
+    		}
+    	}
+    	c_seach++;
+	}
+    MES("～～　検索処理　終了　～～\n");
     
     //ファイルのクローズ
     fclose(p_fileR);
     fclose(p_fileW);
     
+    MES("--プログラム終了\n");
     return 0;
 }
 
@@ -191,14 +253,14 @@ void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int fl
 /*****************************************
  *    インバーテッドテーブルの内容表示
  *****************************************/
- void DisplayTable(char *s_title, int *ar_list)
+ void DisplayTable(char *s_title, int *ar_list, int c_max)
  {
  	 int i;
  	 
  	 //一行を記述
- 	 printf("%s\t:",s_title);
- 	 for(i=0; i<INVERT_ROW; i++){
- 	 	 printf("%3d:",ar_list[i]);
+ 	 MES("%s  \t:",s_title);
+ 	 for(i=0; i<= c_max; i++){
+ 	 	 MES("%3d:",ar_list[i]);
  	 }
- 	 printf("\n");
+ 	 MES("\n");
  }
