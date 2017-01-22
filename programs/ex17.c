@@ -222,22 +222,24 @@ int main(void){
     				if(strcmp(s_inpCity, t_cityName[i]))
     					break;
     			}
+    			//DEBAG("cityname:%s\n",t_cityName[i]);
     			//学部
     			for(j=0; j<c_fac; j++){
-    				if(strcmp(s_inpFac, t_facName[i]))
+    				if(strcmp(s_inpFac, t_facName[j]))
     					break;
     			}
+    			//DEBAG("facname:%s\n",t_facName[j]);
     			
-    			SeachTable(t_cityRec[i], t_facRec[j], ar_seach, i_inp);
+    			SeachTable(t_cityRec[i-1], t_facRec[j-1], ar_seach, i_inp);
     			
     			//DEBAG("%d:::\n",ar_seach[0]-1);
     			
     			//検索結果の表示
     			
-    			if(ar_seach[0] > 1){
-    				for(i=1; i<ar_seach[0]; i++){
+    			if(ar_seach[0] > 0){
+    				for(i=1; i<=ar_seach[0]; i++){
     					//DEBAG("%d  \n", ar_seach[i]);
-    					MES("(%3d) 順番＝%d\n", i+1,ar_seach[i]);
+    					MES("(%3d) 順番＝%d\n", i,ar_seach[i]);
     					fseek(p_fileR, REC*(ar_seach[i]-1), 0);
     					fscanf(p_fileR, R_FIELD, s_name, s_sex, s_pref, s_city, s_school, s_fac);
     					
@@ -322,6 +324,7 @@ void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int fl
  *****************************************/
  void SeachTable(int *ar_city, int *ar_fac, int *ar_seach, int i_mood)
  {
+ 	 int tmp;
  	 int i,j;
  	 for(i=0; i<INVERT_ROW*2; i++){
  	 	 ar_seach[i] = -9;
@@ -329,23 +332,29 @@ void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int fl
  	 ar_seach[0] = 0;
  	 DEBAG("initialize Done\n");
  	 if(!(i_mood-1)){
- 	 	 DEBAG("seki\n");
+ 	 	 //DEBAG("seki\n");
  	 	 //積
  	 	 for(i=1; i<ar_city[0]; i++){
  	 	 	 for(j=1; j<ar_fac[0]; j++){
  	 	 	 	 if(ar_city[i] == ar_fac[j]){
  	 	 	 	 	 ar_seach[++ar_seach[0]] = ar_city[i];
+ 	 	 	 	 	 DEBAG("%d:%d",ar_seach[0], ar_city[i]);
  	 	 	 	 	 break;
  	 	 	 	 }
  	 	 	 }
  	 	 }
- 	 	 MES("　　   論理積データ　%d件\n",ar_seach[0]-1);
+ 	 	 MES("　　   論理積データ　%d件\n",ar_seach[0]);
+ 	 	 
+ 	 	/* for(i=0; i<=ar_seach[0]; i++){
+ 	 	 	 DEBAG(":%d",ar_seach[i]);
+ 	 	 }
+ 	 	 */
  	 }
  	 else{
- 	 	 DEBAG("wa\n");
+ 	 	 //DEBAG("wa\n");
  	 	 //和
  	 	 //学部テーブルを流し込む
- 	 	 for(i=1; i<ar_fac[0]; i++)
+ 	 	 for(i=1; i<=ar_fac[0]; i++)
 			ar_seach[++ar_seach[0]] = ar_fac[i];
 			
 		//学部テーブルになかったものを市名テーブルから追加する
@@ -353,10 +362,10 @@ void EditTable(char *s_newTitle, char *s_title, int *ar_list, int recNum, int fl
  	 	 	 for(j=1; j<ar_fac[0]; j++){
  				//何もしない
  	 	 	 }
- 	 	 	 if(j < ar_fac[0]){
+ 	 	 	 if(j == ar_fac[0]){
  	 	 	 	 ar_seach[++ar_seach[0]] = ar_city[i];
  	 	 	 }
  	 	 }
- 	 	 MES("　　   論理和データ　%d件\n",ar_seach[0]-1);
+ 	 	 MES("　　   論理和データ　%d件\n",ar_seach[0]);
  	 }
  }
