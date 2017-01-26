@@ -3,7 +3,6 @@
 import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Random;
 
 public class stickGraph  extends  Applet  implements  ActionListener
 {
