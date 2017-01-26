@@ -29,16 +29,16 @@ public class stickGraph  extends  Applet  implements  ActionListener
 	
 	public void actionPerformed( ActionEvent e )
 	{
-		//if(cnt >= max-1){
+		if(cnt >= max){
 			//Œx
-		//}
-		//else{
+		}
+		else{
 			String t = box.getText();
 			num[cnt] = Integer.parseInt( t );
 			cnt++;
 			paint = true;
 			repaint();
-		//}
+		}
 	}
 	
 	public void paint (Graphics g)
@@ -55,23 +55,36 @@ public class stickGraph  extends  Applet  implements  ActionListener
 		//ƒOƒ‰ƒtŒn
 		g.setColor(Color.black);
 		g.drawLine(x0,150,x0,450);
-		g.drawLine(x0,y0,g_size*11,y0);
+		g.drawLine(x0,y0,g_size*(max+3),y0);
 		//–Ú·‚èŒn
 		for(i=0; i<11; i++){
-		int y = y0 + ((25-(i*5))*val);
-			g.drawLine(x0+10,y0,x0,y0);
+			int y = y0 + ((25-(i*5))*val);
+			String t = Integer.toString((i*5)-25);
+			if(((i*5)-25) > 0) t = "+" + t;
+			g.drawLine(x0-10,y,x0,y);
+			g.drawString(t, x0-30, y);
 		}
 		
 		//ƒOƒ‰ƒt•\¦Œn
 		if(paint){
-			for(i=0; i<=cnt; i++){
+			for(i=0; i<cnt; i++){
 				int x = x0+10+(g_size*i);
-				int y = y0-(num[i]*val);
-				
+				int y, y_size;
+				if(num[i] >= 0){
+					y = y0-(num[i]*val);
+					y_size = num[i]*val;
+				}
+				else{
+					y = y0;
+					y_size = (-num[i]*val);
+				}
 				g.setColor(colors[i%6]);
-				g.fillRect(x, y, g_size, num[i]*val);
+				g.fillRect(x, y, g_size, y_size);
+				
+				g.setColor(Color.black);
+				g.drawString((i+1)+"‰ñ", x+5,150);
 			}
 		}
-		showStatus(">>>>>>>>>>>>>>>•`‰æ"+(cnt+1)+"‰ñ"+num[cnt-1]);
+		showStatus(">>>>>>>>>>>>>>>•`‰æ"+cnt+"‰ñ"+num[cnt-1]);
 	}
 }
