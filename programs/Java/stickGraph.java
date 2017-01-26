@@ -29,7 +29,7 @@ public class stickGraph  extends  Applet  implements  ActionListener
 	public void actionPerformed( ActionEvent e )
 	{
 		if(cnt >= max){
-			//Œx
+			showStatus("ERR:ŒÀ“x‰ñ”‚ğ’´‰ß‚µ‚Ä‚¢‚Ü‚·");
 		}
 		else{
 			String t = box.getText();

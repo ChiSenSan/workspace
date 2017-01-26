@@ -48,7 +48,7 @@ private Color[] colors = {Color.red, Color.blue, Color.yellow, Color.green, Colo
 	public void actionPerformed( ActionEvent e )
 	{
 		if(cnt >= max){
-			//Œx
+			showStatus("ERR:ŒÀ“x‰ñ”‚ğ’´‰ß‚µ‚Ä‚¢‚Ü‚·");
 		}
 		else{
 			names[cnt] = name_box.getText();
@@ -74,7 +74,7 @@ private Color[] colors = {Color.red, Color.blue, Color.yellow, Color.green, Colo
 			    repaint();
 			}
 			else{
-				//Œx
+				showStatus("ERR:“_”‚ğ³‚µ‚­“ü—Í‚µ‚Ä‚­‚¾‚³‚¢");
 			}
 		}
 	}
@@ -140,6 +140,7 @@ private Color[] colors = {Color.red, Color.blue, Color.yellow, Color.green, Colo
 				g.drawString("("+(i+1)+")   "+names[i], sx, sy+(i*10));
 			}
 			paint = false;
+			showStatus("“ü—Í "+i+"‰ñ");
 		}
 	}
 }
